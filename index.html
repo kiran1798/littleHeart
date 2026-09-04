@@ -1,0 +1,585 @@
+<title>Mass Entry</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@500;600;700;800&family=Space+Mono&display=swap">
+<style>
+  :root{
+    --bg:#faf3e6;
+    --surface:#fff9ef;
+    --surface-2:#f3e6cd;
+    --ink:#2b1210;
+    --ink-soft:#5c3f37;
+    --accent:#b8791f;
+    --accent-2:#a63324;
+    --muted:#8a6f5c;
+    --line:#dfc79c;
+    --ok:#3f7a4e;
+    --bad:#a63324;
+    --shadow: 0 18px 40px -20px rgba(43,18,16,.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#1a0c0e;
+      --surface:#2a1416;
+      --surface-2:#3a1c1c;
+      --ink:#f7ecd9;
+      --ink-soft:#d9bfae;
+      --accent:#f0ab3e;
+      --accent-2:#ef7256;
+      --muted:#b79a86;
+      --line:#4a2a26;
+      --ok:#7bc78f;
+      --bad:#ef7256;
+      --shadow: 0 24px 60px -20px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#1a0c0e;
+    --surface:#2a1416;
+    --surface-2:#3a1c1c;
+    --ink:#f7ecd9;
+    --ink-soft:#d9bfae;
+    --accent:#f0ab3e;
+    --accent-2:#ef7256;
+    --muted:#b79a86;
+    --line:#4a2a26;
+    --ok:#7bc78f;
+    --bad:#ef7256;
+    --shadow: 0 24px 60px -20px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, color-mix(in srgb, var(--accent) 16%, transparent), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Manrope", ui-sans-serif, system-ui, sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:40px 18px 56px;
+  }
+  h1,h2,h3{ text-wrap:balance; font-family:"Fraunces", Georgia, serif; margin:0; }
+
+  .stage{
+    width:100%;
+    max-width:460px;
+  }
+
+  .marquee{
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .marquee .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family:"Space Mono", ui-monospace, monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    margin-bottom:10px;
+  }
+  .marquee .eyebrow::before, .marquee .eyebrow::after{
+    content:"";
+    width:22px; height:1px;
+    background:var(--accent-2);
+    opacity:.5;
+  }
+  .marquee h1{
+    font-size:clamp(34px,9vw,46px);
+    font-weight:700;
+    font-style:italic;
+    color:var(--ink);
+  }
+  .marquee p{
+    margin:8px 0 0;
+    color:var(--muted);
+    font-size:14.5px;
+  }
+
+  .ticket{
+    background:var(--surface);
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+
+  .ticket-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 20px;
+    background:var(--surface-2);
+    border-bottom:1px dashed var(--line);
+    font-family:"Space Mono", ui-monospace, monospace;
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+  }
+  .ticket-head .best{
+    font-variant-numeric: tabular-nums;
+    color:var(--accent-2);
+    font-weight:700;
+  }
+
+  .progress-row{
+    display:flex;
+    gap:6px;
+    padding:14px 20px 0;
+  }
+  .dot{
+    flex:1;
+    height:5px;
+    border-radius:3px;
+    background:var(--line);
+    overflow:hidden;
+  }
+  .dot i{
+    display:block;
+    height:100%;
+    width:0%;
+    background:var(--accent);
+    transition:width .3s ease;
+  }
+  .dot.done i{ width:100%; background:var(--ok); }
+  .dot.wrong i{ width:100%; background:var(--bad); }
+  .dot.current i{ width:100%; background:var(--accent); }
+
+  .stagebox{
+    padding:30px 26px 8px;
+    text-align:center;
+  }
+
+  .spotlight{
+    width:132px; height:132px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%),
+      var(--surface-2);
+    border:1px solid var(--line);
+    position:relative;
+  }
+  .spotlight svg{ width:62px; height:62px; color:var(--accent-2); }
+
+  .clue{
+    font-family:"Fraunces", Georgia, serif;
+    font-style:italic;
+    font-size:19px;
+    line-height:1.45;
+    color:var(--ink);
+    max-width:34ch;
+    margin:0 auto;
+  }
+  .who{
+    margin-top:12px;
+    font-size:13px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .who b{ color:var(--ink-soft); }
+
+  form.guess{
+    padding:22px 26px 0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .guess input{
+    width:100%;
+    padding:13px 16px;
+    border-radius:12px;
+    border:1.5px solid var(--line);
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Manrope", sans-serif;
+    font-size:15px;
+    outline:none;
+  }
+  .guess input:focus{ border-color:var(--accent); }
+  .guess input::placeholder{ color:var(--muted); }
+
+  .btnrow{ display:flex; gap:10px; }
+  button{
+    font-family:"Manrope", sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    border-radius:12px;
+    border:none;
+    padding:13px 18px;
+    cursor:pointer;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  button:focus-visible{ outline:2px solid var(--accent-2); outline-offset:2px; }
+  button:active{ transform:scale(.97); }
+  .btn-primary{
+    flex:1;
+    background:var(--accent-2);
+    color:#fff9ef;
+  }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-ghost{
+    background:transparent;
+    color:var(--muted);
+    border:1.5px solid var(--line);
+  }
+
+  .reveal{
+    margin:18px 26px 0;
+    padding:16px 18px;
+    border-radius:14px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    display:none;
+  }
+  .reveal.show{ display:block; animation:curtain .32s ease; }
+  @keyframes curtain{ from{ opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  .reveal .verdict{
+    font-family:"Space Mono", monospace;
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .reveal.correct .verdict{ color:var(--ok); }
+  .reveal.wrong .verdict{ color:var(--bad); }
+  .reveal h3{ font-size:20px; font-style:italic; }
+  .reveal .meta{ font-size:12.5px; color:var(--muted); margin-top:2px; }
+  .reveal .fact{ font-size:13.5px; color:var(--ink-soft); margin-top:10px; line-height:1.5; }
+
+  .foot{
+    display:flex;
+    justify-content:flex-end;
+    padding:16px 26px 24px;
+  }
+
+  .final{ padding:36px 30px 30px; text-align:center; }
+  .final .stub{
+    font-family:"Space Mono", monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent-2);
+  }
+  .final .score{
+    font-family:"Fraunces", serif;
+    font-weight:700;
+    font-size:56px;
+    margin:6px 0 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .final .score span{ font-size:26px; color:var(--muted); font-weight:500; }
+  .final .badge{
+    display:inline-block;
+    margin-top:10px;
+    padding:5px 12px;
+    border-radius:999px;
+    background:color-mix(in srgb, var(--ok) 18%, transparent);
+    color:var(--ok);
+    font-size:12.5px;
+    font-weight:700;
+  }
+  .final p.tag{ color:var(--muted); font-size:14px; margin:16px 0 22px; }
+  .final .actions{ display:flex; gap:10px; }
+
+  .perf{
+    display:flex;
+    gap:3px;
+    padding:0 14px;
+    height:8px;
+    align-items:center;
+  }
+  .perf i{ flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal.show{ animation:none; }
+    button, .dot i{ transition:none; }
+  }
+</style>
+
+<div class="stage">
+  <div class="marquee">
+    <div class="eyebrow">Tollywood Trivia</div>
+    <h1>Mass Entry</h1>
+    <p>One clue, one hero's entrance. Guess the film.</p>
+  </div>
+
+  <div class="ticket">
+    <div class="ticket-head">
+      <span id="sceneLabel">SCENE 01 / 10</span>
+      <span class="best" id="bestLabel">BEST —</span>
+    </div>
+    <div class="progress-row" id="progressRow"></div>
+
+    <div id="playArea">
+      <div class="stagebox">
+        <div class="spotlight" id="iconHost"></div>
+        <p class="clue" id="clueText"></p>
+        <p class="who">Starring <b id="actorText"></b></p>
+      </div>
+
+      <form class="guess" id="guessForm" autocomplete="off">
+        <input id="guessInput" type="text" placeholder="Type the movie name…" aria-label="Your guess" />
+        <div class="btnrow">
+          <button type="submit" class="btn-primary" id="submitBtn">Lock it in</button>
+          <button type="button" class="btn-ghost" id="skipBtn">Skip</button>
+        </div>
+      </form>
+
+      <div class="reveal" id="revealBox">
+        <div class="verdict" id="verdictText"></div>
+        <h3 id="revealMovie"></h3>
+        <div class="meta" id="revealMeta"></div>
+        <div class="fact" id="revealFact"></div>
+      </div>
+
+      <div class="foot">
+        <button type="button" class="btn-primary" id="nextBtn" style="display:none">Next scene →</button>
+      </div>
+    </div>
+
+    <div id="finalArea" style="display:none">
+      <div class="perf"><i></i></div>
+      <div class="final">
+        <div class="stub">Show's over</div>
+        <div class="score"><span id="finalScore">0</span><span> / <span id="finalTotal">10</span></span></div>
+        <div class="badge" id="bestBadge" style="display:none">New personal best</div>
+        <p class="tag" id="finalTag"></p>
+        <div class="actions">
+          <button class="btn-primary" id="replayBtn" style="flex:1">Roll it again</button>
+        </div>
+      </div>
+      <div class="perf"><i></i></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ROUNDS = [
+    { movie:"Baahubali: The Beginning", year:2015, actor:"Prabhas", icon:"sword",
+      clue:"“Why did Kattappa kill Baahubali?” — the cliffhanger that broke the internet for two straight years.",
+      fact:"The sequel's answer scene became one of the most-anticipated reveals in Indian cinema history.",
+      answers:["baahubali","baahubalithebeginning","bahubali","baahubali1","bahubalithebeginning"] },
+    { movie:"RRR", year:2022, actor:"N. T. Rama Rao Jr. & Ram Charan", icon:"flames",
+      clue:"Two revolutionaries, one rooftop dance-off — “Naatu Naatu” went all the way to the Oscars stage.",
+      fact:"“Naatu Naatu” won the Academy Award for Best Original Song in 2023 — a first for an Indian film.",
+      answers:["rrr","riseroarrevolt"] },
+    { movie:"Pushpa: The Rise", year:2021, actor:"Allu Arjun", icon:"log",
+      clue:"A red-sandalwood smuggler with a signature shoulder tilt and the line “Thaggede Le.”",
+      fact:"His hunched, sideways swagger walk turned into a nationwide meme and dance trend.",
+      answers:["pushpa","pushpatherise","pushpa1"] },
+    { movie:"Arjun Reddy", year:2017, actor:"Vijay Deverakonda", icon:"moto",
+      clue:"A brilliant, self-destructive surgeon who rides in loud and breaks every rule on the ward.",
+      fact:"It was later remade in Hindi as Kabir Singh, sparking a nationwide debate over the lead character.",
+      answers:["arjunreddy"] },
+    { movie:"Magadheera", year:2009, actor:"Ram Charan", icon:"shield",
+      clue:"A warrior's soul crosses 400 years to finish a duel he lost in a past life.",
+      fact:"It was the highest-grossing Telugu film of its era, remembered for its climactic waterfall battle.",
+      answers:["magadheera"] },
+    { movie:"Eega", year:2012, actor:"Nani (as a housefly)", icon:"fly",
+      clue:"Murdered, reincarnated as a housefly, and out for revenge — buzzing with a grudge.",
+      fact:"Released in Hindi as Makkhi, it's one of the most original revenge plots ever put on screen.",
+      answers:["eega","makkhi"] },
+    { movie:"Ala Vaikunthapurramuloo", year:2020, actor:"Allu Arjun", icon:"briefcase",
+      clue:"Swapped at birth, living two lives at once — one modest, one filthy rich.",
+      fact:"The tongue-twister title became almost as famous as the film itself.",
+      answers:["alavaikunthapurramuloo","avpl"] },
+    { movie:"Jersey", year:2019, actor:"Nani", icon:"jersey",
+      clue:"A washed-up cricketer laces up his boots one more time to make his son proud.",
+      fact:"It was remade in Hindi with Shahid Kapoor, keeping the hero's jersey number 7.",
+      answers:["jersey"] },
+    { movie:"Sye Raa Narasimha Reddy", year:2019, actor:"Chiranjeevi", icon:"chain",
+      clue:"A tribal chieftain raises his sword against the British, decades before 1857.",
+      fact:"Megastar Chiranjeevi produced and starred in this period drama, shot on a sweeping historical scale.",
+      answers:["syeraa","syeraanarasimhareddy","syeraanarasimha"] },
+    { movie:"Bommarillu", year:2006, actor:"Siddharth", icon:"house",
+      clue:"An overprotective father builds his son a literal “house of dolls” — until love rewrites the rules.",
+      fact:"The title itself translates to “House of Dolls,” a nod to how sheltered the hero's life is.",
+      answers:["bommarillu"] }
+  ];
+
+  var ICONS = {
+    sword: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 34 L34 14"/><path d="M30 10 L38 18 L34 22 L26 14 Z" fill="currentColor" stroke="none"/><path d="M14 34 L10 38 M10 34 L14 38" /><circle cx="12" cy="36" r="2.4" fill="currentColor" stroke="none"/></svg>',
+    flames: '<svg viewBox="0 0 48 48" fill="currentColor"><path d="M17 8c-4 8 2 10-1 16-3-2-4-6-4-6-3 5-2 12 4 15 5 2.6 12 .6 13.6-5.4 1.3-4.8-1.6-7.6-3.6-11 2 .5 4 2 4 2 1-6-3-11-9-12.6-1 3 0 5-1 7-1-2-1.6-3.6-3-5z"/></svg>',
+    log: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="24" rx="6" ry="9"/><ellipse cx="12" cy="24" rx="2.4" ry="4"/><path d="M12 15 H34 M12 33 H34"/><ellipse cx="34" cy="24" rx="6" ry="9"/></svg>',
+    moto: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="34" r="5"/><circle cx="36" cy="34" r="5"/><path d="M12 34 L20 20 H30 L36 34 M20 20 L26 12 H31"/></svg>',
+    shield: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M24 6 L38 12 V22 C38 32 32 39 24 42 C16 39 10 32 10 22 V12 Z"/><path d="M18 23 L22 27 L30 18" stroke-linecap="round"/></svg>',
+    fly: '<svg viewBox="0 0 48 48" fill="currentColor"><ellipse cx="24" cy="26" rx="5.5" ry="8"/><circle cx="24" cy="15" r="5"/><path d="M15 12 C10 10 6 12 8 17 C11 16 14 15 16 13Z"/><path d="M33 12 C38 10 42 12 40 17 C37 16 34 15 32 13Z"/><path d="M13 30 C8 30 5 33 8 37 C11 35 13 33 15 31Z"/><path d="M35 30 C40 30 43 33 40 37 C37 35 35 33 33 31Z"/></svg>',
+    briefcase: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><rect x="8" y="18" width="16" height="20" rx="2"/><rect x="24" y="10" width="16" height="20" rx="2"/><path d="M13 18 V15 a3 3 0 0 1 3-3 h4 a3 3 0 0 1 3 3 v3 M29 10 V7 a3 3 0 0 1 3-3 h4 a3 3 0 0 1 3 3 v3"/></svg>',
+    jersey: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M16 8 L8 14 L12 20 L16 17 V40 H32 V17 L36 20 L40 14 L32 8 C32 11 28 13 24 13 C20 13 16 11 16 8Z"/><text x="24" y="32" font-family="Space Mono, monospace" font-size="12" fill="currentColor" stroke="none" text-anchor="middle">7</text></svg>',
+    chain: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6"><rect x="6" y="16" width="12" height="18" rx="6"/><rect x="16" y="10" width="12" height="18" rx="6" transform="rotate(20 22 19)"/><path d="M30 30 L40 20 M40 30 L30 20" stroke-linecap="round"/></svg>',
+    house: '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M8 22 L24 8 L40 22"/><rect x="13" y="22" width="22" height="16"/><rect x="20" y="28" width="8" height="10"/><path d="M17 22 V17 H23 V22" /></svg>'
+  };
+
+  var order = [];
+  var idx = 0;
+  var score = 0;
+  var answered = false;
+
+  var els = {
+    sceneLabel: document.getElementById('sceneLabel'),
+    bestLabel: document.getElementById('bestLabel'),
+    progressRow: document.getElementById('progressRow'),
+    iconHost: document.getElementById('iconHost'),
+    clueText: document.getElementById('clueText'),
+    actorText: document.getElementById('actorText'),
+    guessForm: document.getElementById('guessForm'),
+    guessInput: document.getElementById('guessInput'),
+    submitBtn: document.getElementById('submitBtn'),
+    skipBtn: document.getElementById('skipBtn'),
+    revealBox: document.getElementById('revealBox'),
+    verdictText: document.getElementById('verdictText'),
+    revealMovie: document.getElementById('revealMovie'),
+    revealMeta: document.getElementById('revealMeta'),
+    revealFact: document.getElementById('revealFact'),
+    nextBtn: document.getElementById('nextBtn'),
+    playArea: document.getElementById('playArea'),
+    finalArea: document.getElementById('finalArea'),
+    finalScore: document.getElementById('finalScore'),
+    finalTotal: document.getElementById('finalTotal'),
+    finalTag: document.getElementById('finalTag'),
+    bestBadge: document.getElementById('bestBadge'),
+    replayBtn: document.getElementById('replayBtn')
+  };
+
+  function shuffledIndices(n){
+    var a = [];
+    for (var i=0;i<n;i++) a.push(i);
+    for (var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function normalize(s){
+    return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  }
+
+  function getBest(){
+    try{ return parseInt(localStorage.getItem('massEntryBest')||"-1",10); }
+    catch(e){ return -1; }
+  }
+  function setBest(v){
+    try{ localStorage.setItem('massEntryBest', String(v)); }catch(e){}
+  }
+
+  function renderProgress(){
+    els.progressRow.innerHTML = "";
+    for (var i=0;i<order.length;i++){
+      var d = document.createElement('div');
+      d.className = 'dot';
+      var bar = document.createElement('i');
+      d.appendChild(bar);
+      els.progressRow.appendChild(d);
+    }
+  }
+
+  function markDot(i, state){
+    var dot = els.progressRow.children[i];
+    if (!dot) return;
+    dot.className = 'dot ' + state;
+  }
+
+  function updateBestLabel(){
+    var b = getBest();
+    els.bestLabel.textContent = b >= 0 ? ('BEST ' + b + '/' + order.length) : 'BEST —';
+  }
+
+  function loadRound(){
+    answered = false;
+    var r = ROUNDS[order[idx]];
+    els.sceneLabel.textContent = 'SCENE ' + String(idx+1).padStart(2,'0') + ' / ' + order.length;
+    els.iconHost.innerHTML = ICONS[r.icon] || '';
+    els.clueText.textContent = r.clue;
+    els.actorText.textContent = r.actor;
+    els.guessInput.value = '';
+    els.guessInput.disabled = false;
+    els.submitBtn.disabled = false;
+    els.skipBtn.style.display = '';
+    els.revealBox.className = 'reveal';
+    els.nextBtn.style.display = 'none';
+    markDot(idx, 'current');
+    setTimeout(function(){ els.guessInput.focus(); }, 50);
+  }
+
+  function reveal(correct, r){
+    answered = true;
+    els.guessInput.disabled = true;
+    els.submitBtn.disabled = true;
+    els.skipBtn.style.display = 'none';
+    els.revealBox.className = 'reveal show ' + (correct ? 'correct' : 'wrong');
+    els.verdictText.textContent = correct ? 'Correct guess' : 'Not quite';
+    els.revealMovie.textContent = r.movie;
+    els.revealMeta.textContent = r.actor + ' · ' + r.year;
+    els.revealFact.textContent = r.fact;
+    els.nextBtn.style.display = '';
+    els.nextBtn.textContent = (idx === order.length - 1) ? 'See final score →' : 'Next scene →';
+    markDot(idx, correct ? 'done' : 'wrong');
+    if (correct) score++;
+  }
+
+  function showFinal(){
+    els.playArea.style.display = 'none';
+    els.finalArea.style.display = 'block';
+    els.finalScore.textContent = score;
+    els.finalTotal.textContent = order.length;
+    var best = getBest();
+    var isNewBest = score > best;
+    if (isNewBest){ setBest(score); }
+    els.bestBadge.style.display = isNewBest ? 'inline-block' : 'none';
+    var pct = score / order.length;
+    var tag = pct === 1 ? "Front-row fan. You didn't miss a single entry."
+      : pct >= 0.7 ? "Solid Tollywood memory — a true regular at the theatre."
+      : pct >= 0.4 ? "Decent showing. A few re-watches wouldn't hurt."
+      : "Time for a Tollywood marathon with your friends.";
+    els.finalTag.textContent = tag;
+  }
+
+  els.guessForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (answered) return;
+    var r = ROUNDS[order[idx]];
+    var g = normalize(els.guessInput.value);
+    if (!g) { els.guessInput.focus(); return; }
+    var correct = r.answers.indexOf(g) !== -1;
+    reveal(correct, r);
+  });
+
+  els.skipBtn.addEventListener('click', function(){
+    if (answered) return;
+    reveal(false, ROUNDS[order[idx]]);
+  });
+
+  els.nextBtn.addEventListener('click', function(){
+    idx++;
+    if (idx >= order.length){ showFinal(); }
+    else { loadRound(); }
+  });
+
+  els.replayBtn.addEventListener('click', function(){
+    startGame();
+  });
+
+  function startGame(){
+    order = shuffledIndices(ROUNDS.length);
+    idx = 0;
+    score = 0;
+    renderProgress();
+    updateBestLabel();
+    els.finalArea.style.display = 'none';
+    els.playArea.style.display = 'block';
+    loadRound();
+  }
+
+  startGame();
+})();
+</script>
