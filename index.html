@@ -189,19 +189,29 @@
     flex-direction:column;
     gap:10px;
   }
-  .guess input{
-    width:100%;
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .option{
+    display:flex;
+    align-items:center;
+    gap:12px;
     padding:13px 16px;
     border-radius:12px;
     border:1.5px solid var(--line);
     background:var(--bg);
-    color:var(--ink);
-    font-family:"Manrope", sans-serif;
-    font-size:15px;
-    outline:none;
+    cursor:pointer;
+    transition:border-color .12s ease, background .12s ease;
   }
-  .guess input:focus{ border-color:var(--accent); }
-  .guess input::placeholder{ color:var(--muted); }
+  .option:has(input:focus-visible){ outline:2px solid var(--accent-2); outline-offset:2px; }
+  .option input{ accent-color:var(--accent-2); width:18px; height:18px; flex-shrink:0; }
+  .option span{ font-size:15px; color:var(--ink); }
+  .option.selected{ border-color:var(--accent); background:color-mix(in srgb, var(--accent) 10%, var(--bg)); }
+  .options.answered .option{ cursor:default; }
+  .option.correct{ border-color:var(--ok); background:color-mix(in srgb, var(--ok) 14%, var(--bg)); }
+  .option.wrong{ border-color:var(--bad); background:color-mix(in srgb, var(--bad) 14%, var(--bg)); }
 
   .btnrow{ display:flex; gap:10px; }
   button{
@@ -324,9 +334,9 @@
       </div>
 
       <form class="guess" id="guessForm" autocomplete="off">
-        <input id="guessInput" type="text" placeholder="Type the movie name…" aria-label="Your guess" />
+        <div class="options" id="optionsHost" role="radiogroup" aria-label="Choose the movie"></div>
         <div class="btnrow">
-          <button type="submit" class="btn-primary" id="submitBtn">Lock it in</button>
+          <button type="submit" class="btn-primary" id="submitBtn" disabled>Lock it in</button>
           <button type="button" class="btn-ghost" id="skipBtn">Skip</button>
         </div>
       </form>
@@ -366,44 +376,34 @@
   var ROUNDS = [
     { movie:"Baahubali: The Beginning", year:2015, actor:"Prabhas", icon:"sword",
       clue:"“Why did Kattappa kill Baahubali?” — the cliffhanger that broke the internet for two straight years.",
-      fact:"The sequel's answer scene became one of the most-anticipated reveals in Indian cinema history.",
-      answers:["baahubali","baahubalithebeginning","bahubali","baahubali1","bahubalithebeginning"] },
+      fact:"The sequel's answer scene became one of the most-anticipated reveals in Indian cinema history." },
     { movie:"RRR", year:2022, actor:"N. T. Rama Rao Jr. & Ram Charan", icon:"flames",
       clue:"Two revolutionaries, one rooftop dance-off — “Naatu Naatu” went all the way to the Oscars stage.",
-      fact:"“Naatu Naatu” won the Academy Award for Best Original Song in 2023 — a first for an Indian film.",
-      answers:["rrr","riseroarrevolt"] },
+      fact:"“Naatu Naatu” won the Academy Award for Best Original Song in 2023 — a first for an Indian film." },
     { movie:"Pushpa: The Rise", year:2021, actor:"Allu Arjun", icon:"log",
       clue:"A red-sandalwood smuggler with a signature shoulder tilt and the line “Thaggede Le.”",
-      fact:"His hunched, sideways swagger walk turned into a nationwide meme and dance trend.",
-      answers:["pushpa","pushpatherise","pushpa1"] },
+      fact:"His hunched, sideways swagger walk turned into a nationwide meme and dance trend." },
     { movie:"Arjun Reddy", year:2017, actor:"Vijay Deverakonda", icon:"moto",
       clue:"A brilliant, self-destructive surgeon who rides in loud and breaks every rule on the ward.",
-      fact:"It was later remade in Hindi as Kabir Singh, sparking a nationwide debate over the lead character.",
-      answers:["arjunreddy"] },
+      fact:"It was later remade in Hindi as Kabir Singh, sparking a nationwide debate over the lead character." },
     { movie:"Magadheera", year:2009, actor:"Ram Charan", icon:"shield",
       clue:"A warrior's soul crosses 400 years to finish a duel he lost in a past life.",
-      fact:"It was the highest-grossing Telugu film of its era, remembered for its climactic waterfall battle.",
-      answers:["magadheera"] },
+      fact:"It was the highest-grossing Telugu film of its era, remembered for its climactic waterfall battle." },
     { movie:"Eega", year:2012, actor:"Nani (as a housefly)", icon:"fly",
       clue:"Murdered, reincarnated as a housefly, and out for revenge — buzzing with a grudge.",
-      fact:"Released in Hindi as Makkhi, it's one of the most original revenge plots ever put on screen.",
-      answers:["eega","makkhi"] },
+      fact:"Released in Hindi as Makkhi, it's one of the most original revenge plots ever put on screen." },
     { movie:"Ala Vaikunthapurramuloo", year:2020, actor:"Allu Arjun", icon:"briefcase",
       clue:"Swapped at birth, living two lives at once — one modest, one filthy rich.",
-      fact:"The tongue-twister title became almost as famous as the film itself.",
-      answers:["alavaikunthapurramuloo","avpl"] },
+      fact:"The tongue-twister title became almost as famous as the film itself." },
     { movie:"Jersey", year:2019, actor:"Nani", icon:"jersey",
       clue:"A washed-up cricketer laces up his boots one more time to make his son proud.",
-      fact:"It was remade in Hindi with Shahid Kapoor, keeping the hero's jersey number 7.",
-      answers:["jersey"] },
+      fact:"It was remade in Hindi with Shahid Kapoor, keeping the hero's jersey number 7." },
     { movie:"Sye Raa Narasimha Reddy", year:2019, actor:"Chiranjeevi", icon:"chain",
       clue:"A tribal chieftain raises his sword against the British, decades before 1857.",
-      fact:"Megastar Chiranjeevi produced and starred in this period drama, shot on a sweeping historical scale.",
-      answers:["syeraa","syeraanarasimhareddy","syeraanarasimha"] },
+      fact:"Megastar Chiranjeevi produced and starred in this period drama, shot on a sweeping historical scale." },
     { movie:"Bommarillu", year:2006, actor:"Siddharth", icon:"house",
       clue:"An overprotective father builds his son a literal “house of dolls” — until love rewrites the rules.",
-      fact:"The title itself translates to “House of Dolls,” a nod to how sheltered the hero's life is.",
-      answers:["bommarillu"] }
+      fact:"The title itself translates to “House of Dolls,” a nod to how sheltered the hero's life is." }
   ];
 
   var ICONS = {
@@ -432,7 +432,7 @@
     clueText: document.getElementById('clueText'),
     actorText: document.getElementById('actorText'),
     guessForm: document.getElementById('guessForm'),
-    guessInput: document.getElementById('guessInput'),
+    optionsHost: document.getElementById('optionsHost'),
     submitBtn: document.getElementById('submitBtn'),
     skipBtn: document.getElementById('skipBtn'),
     revealBox: document.getElementById('revealBox'),
@@ -460,8 +460,43 @@
     return a;
   }
 
-  function normalize(s){
-    return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  var currentOptions = [];
+
+  function buildOptions(r){
+    var pool = ROUNDS.filter(function(x){ return x.movie !== r.movie; });
+    var pickOrder = shuffledIndices(pool.length);
+    var distractors = [pool[pickOrder[0]], pool[pickOrder[1]]];
+    var opts = [
+      { title:r.movie, correct:true },
+      { title:distractors[0].movie, correct:false },
+      { title:distractors[1].movie, correct:false }
+    ];
+    var mixOrder = shuffledIndices(3);
+    return mixOrder.map(function(i){ return opts[i]; });
+  }
+
+  function renderOptions(){
+    els.optionsHost.innerHTML = '';
+    els.optionsHost.className = 'options';
+    currentOptions.forEach(function(opt, i){
+      var label = document.createElement('label');
+      label.className = 'option';
+      label.dataset.idx = String(i);
+      var input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'guessOption';
+      input.value = String(i);
+      var span = document.createElement('span');
+      span.textContent = opt.title;
+      label.appendChild(input);
+      label.appendChild(span);
+      els.optionsHost.appendChild(label);
+    });
+  }
+
+  function selectedIndex(){
+    var checked = els.optionsHost.querySelector('input[name="guessOption"]:checked');
+    return checked ? parseInt(checked.value, 10) : -1;
   }
 
   function getBest(){
@@ -501,19 +536,25 @@
     els.iconHost.innerHTML = ICONS[r.icon] || '';
     els.clueText.textContent = r.clue;
     els.actorText.textContent = r.actor;
-    els.guessInput.value = '';
-    els.guessInput.disabled = false;
-    els.submitBtn.disabled = false;
+    currentOptions = buildOptions(r);
+    renderOptions();
+    els.submitBtn.disabled = true;
     els.skipBtn.style.display = '';
     els.revealBox.className = 'reveal';
     els.nextBtn.style.display = 'none';
     markDot(idx, 'current');
-    setTimeout(function(){ els.guessInput.focus(); }, 50);
   }
 
-  function reveal(correct, r){
+  function reveal(pickedIdx, r){
     answered = true;
-    els.guessInput.disabled = true;
+    var correct = pickedIdx >= 0 && currentOptions[pickedIdx].correct;
+    els.optionsHost.className = 'options answered';
+    Array.prototype.forEach.call(els.optionsHost.querySelectorAll('input'), function(inp){ inp.disabled = true; });
+    currentOptions.forEach(function(opt, i){
+      var label = els.optionsHost.querySelector('.option[data-idx="' + i + '"]');
+      if (opt.correct) label.classList.add('correct');
+      else if (i === pickedIdx) label.classList.add('wrong');
+    });
     els.submitBtn.disabled = true;
     els.skipBtn.style.display = 'none';
     els.revealBox.className = 'reveal show ' + (correct ? 'correct' : 'wrong');
@@ -544,19 +585,25 @@
     els.finalTag.textContent = tag;
   }
 
+  els.optionsHost.addEventListener('change', function(){
+    if (answered) return;
+    Array.prototype.forEach.call(els.optionsHost.querySelectorAll('.option'), function(label){
+      label.classList.toggle('selected', parseInt(label.dataset.idx, 10) === selectedIndex());
+    });
+    els.submitBtn.disabled = selectedIndex() < 0;
+  });
+
   els.guessForm.addEventListener('submit', function(e){
     e.preventDefault();
     if (answered) return;
-    var r = ROUNDS[order[idx]];
-    var g = normalize(els.guessInput.value);
-    if (!g) { els.guessInput.focus(); return; }
-    var correct = r.answers.indexOf(g) !== -1;
-    reveal(correct, r);
+    var picked = selectedIndex();
+    if (picked < 0) return;
+    reveal(picked, ROUNDS[order[idx]]);
   });
 
   els.skipBtn.addEventListener('click', function(){
     if (answered) return;
-    reveal(false, ROUNDS[order[idx]]);
+    reveal(-1, ROUNDS[order[idx]]);
   });
 
   els.nextBtn.addEventListener('click', function(){
