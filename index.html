@@ -423,6 +423,7 @@
   var idx = 0;
   var score = 0;
   var answered = false;
+  var sessionLog = [];
 
   var els = {
     sceneLabel: document.getElementById('sceneLabel'),
@@ -566,6 +567,17 @@
     els.nextBtn.textContent = (idx === order.length - 1) ? 'See final score →' : 'Next scene →';
     markDot(idx, correct ? 'done' : 'wrong');
     if (correct) score++;
+    sessionLog.push({ movie:r.movie, correct:correct });
+  }
+
+  function notifyFinish(){
+    try{
+      fetch('/api/notify', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({ score:score, total:order.length, rounds:sessionLog })
+      }).catch(function(){});
+    }catch(e){}
   }
 
   function showFinal(){
@@ -583,6 +595,7 @@
       : pct >= 0.4 ? "Decent showing. A few re-watches wouldn't hurt."
       : "Time for a Tollywood marathon with your friends.";
     els.finalTag.textContent = tag;
+    notifyFinish();
   }
 
   els.optionsHost.addEventListener('change', function(){
@@ -620,6 +633,7 @@
     order = shuffledIndices(ROUNDS.length);
     idx = 0;
     score = 0;
+    sessionLog = [];
     renderProgress();
     updateBestLabel();
     els.finalArea.style.display = 'none';
